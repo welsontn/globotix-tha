@@ -1,0 +1,43 @@
+#!/user/bin/env bash
+
+# Builtkit and CLI build
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
+
+# which docker-compose & env file to use
+COMPOSE_FILE="local"
+
+# Disable pseudo-TTY allocation for CI (Jenkins, Github Action)
+TTY=""
+if [ ! -z "$BUILD_NUMBER" ] || [ ! -z "$GITHUB_RUN_NUMBER" ]; then
+  COMPOSE_FILE="ci"
+  TTY="-T"
+fi
+
+# docker-compose command
+COMPOSE="docker-compose --env-file ./.env.$COMPOSE_FILE -f docker-compose.$COMPOSE_FILE.yml"
+
+if [ $# -gt 0 ]; then
+
+  # Run database seeding
+  if [ "$1" == "seed" ]; then
+    shift 1
+    $COMPOSE run --rm $TTY \
+        node \
+        npm run seed
+
+  # If "node" is used, run npm
+  # from our node container
+  elif [ "$1" == "node" ]; then
+    shift 1
+    $COMPOSE run --rm $TTY \
+        node \
+        npm "$@"
+
+  # else run command
+  else
+    $COMPOSE "$@"
+  fi
+else
+  $COMPOSE ps
+fi

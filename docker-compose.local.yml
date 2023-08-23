@@ -1,0 +1,24 @@
+version: '3.1'
+
+services:
+  node:
+    extends:
+      file: docker-compose.base.yml
+      service: node
+    build:
+      target: "dev"
+    entrypoint: "/bin/sh"
+    tty: true
+
+  mongo:
+    extends:
+      file: docker-compose.base.yml
+      service: mongo
+    ports:
+      - ${MONGO_PORT}:${MONGO_PORT}
+
+
+networks:
+  globotixnetwork:
+    name: globotixnetwork
+    driver: "bridge"

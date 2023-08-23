@@ -1,0 +1,865 @@
+openapi: 3.0.3
+info:
+  contact:
+    name: Welson
+  description: BE - Take Home Assignment
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Globotix Robot - Cleaning Plan
+  version: "0.1"
+servers:
+- url: http://localhost:8888/api/v1
+security:
+- bearerAuth: []
+tags:
+- description: Cleaning Plan
+  name: plan
+paths:
+  /plans:
+    get:
+      description: Get a list of cleaning plans
+      operationId: getPlans
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/cleaningPlan'
+                type: array
+          description: Successful operation
+        "400":
+          description: Error
+      summary: Get a list of cleaning plans
+      tags:
+      - plan
+      x-eov-operation-handler: controllers/PlanController
+    post:
+      description: Add a new cleaning plan with map image uploaded too.
+      operationId: addPlan
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/addPlan_request'
+        description: Cleaning plan with all of its particulars to be added to database
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Error
+      summary: Add a new cleaning plan
+      tags:
+      - plan
+      x-eov-operation-handler: controllers/PlanController
+    put:
+      description: Update existing cleaning plan. Optionally a map image.
+      operationId: updatePlan
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/updatePlan_request'
+        description: Cleaning plan with all of its particulars to be updated
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Error
+      summary: Update existing cleaning plan
+      tags:
+      - plan
+      x-eov-operation-handler: controllers/PlanController
+  /plans/{planId}:
+    delete:
+      description: Delete cleaning plan along with its map image file by ID
+      operationId: deletePlanById
+      parameters:
+      - explode: false
+        in: path
+        name: planId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: ID Not found
+      summary: Delete cleaning plan along with its map image file by ID
+      tags:
+      - plan
+      x-eov-operation-handler: controllers/PlanController
+  /plans/{planId}/map:
+    get:
+      description: "Get a list of map object with image file along with its data such\
+        \ as startingPoint, noGoZones, etc"
+      operationId: getMapByPlanId
+      parameters:
+      - explode: false
+        in: path
+        name: planId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/map'
+          description: Successful operation with a list of maps
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Should only error if no plan ID is found
+      summary: Get a list of map object with image file along with its data
+      tags:
+      - plan
+      x-eov-operation-handler: controllers/PlanController
+  /plans/{planId}/clean_zones:
+    put:
+      description: |
+        Update cleaning zone object with json
+      operationId: updateZoneByZoneId
+      parameters:
+      - explode: false
+        in: path
+        name: planId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: '#/components/schemas/cleanZone'
+              type: array
+        description: Update cleaning zone object
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Error
+      summary: Update cleaning zone object with json
+      tags:
+      - plan
+      x-eov-operation-handler: controllers/PlanController
+  /plans/{planId}/no_go_zones:
+    put:
+      description: |
+        Update No Go zone object with json
+      operationId: updateNoGoZoneByZoneId
+      parameters:
+      - explode: false
+        in: path
+        name: planId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/noGoZone'
+        description: Update No Go zone object
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Error
+      summary: Update No Go zone object with json
+      tags:
+      - plan
+      x-eov-operation-handler: controllers/PlanController
+  /plans/{planId}/no_clean_zones:
+    put:
+      description: |
+        Update No Clean zone object with json
+      operationId: updateNoCleanZoneByZoneId
+      parameters:
+      - explode: false
+        in: path
+        name: planId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/noCleanZone'
+        description: Update No Clean zone object
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Error
+      summary: Update No Clean zone object with json
+      tags:
+      - plan
+      x-eov-operation-handler: controllers/PlanController
+  /plans/{planId}/favorites:
+    get:
+      description: "Get cleaning Favorite Plan object along with its data such as\
+        \ startingPoint, noGoZones, etc"
+      operationId: getFavoritesByPlanId
+      parameters:
+      - explode: false
+        in: path
+        name: planId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/cleaningFavorite'
+                type: array
+          description: Successful operation with a list of cleaning favorite
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Should only error if plan ID is not found
+      summary: Get cleaning Favorite Plan object
+      tags:
+      - plan
+      x-eov-operation-handler: controllers/PlanController
+  /plans/{planId}/command:
+    post:
+      description: "Create a cleaning plan command object and send to Robot based\
+        \ on Cleaning Plan object    \n  Also generate command log and stored on server\
+        \ side\n\nFollowing informations are stored in logs:  \n  Location Name, order\
+        \ of zone to be cleaned, cleaning parameters for each zones, skipped zones\
+        \ and starting time the cleaning plan run\n"
+      operationId: addPlanCommand
+      parameters:
+      - explode: false
+        in: path
+        name: planId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Error
+      summary: Create a cleaning plan command object and send to robot
+      tags:
+      - plan
+      x-eov-operation-handler: controllers/PlanController
+components:
+  schemas:
+    cleaningPlan:
+      example:
+        name: name
+        id: id
+        cleaning_favorites:
+        - default: false
+          name: name
+          id: id
+          map:
+            startingPoint:
+            - 0.8008281904610115
+            - 0.8008281904610115
+            path: path
+            mapData: mapData
+            name: name
+            cleanZones:
+            - cleaningRound: 5
+              name: name
+              cleaningDuration: 00:30:00
+              id: id
+              positions:
+              - 1.4658129805029452
+              - 1.4658129805029452
+              cleaningPreset:
+                side_brush:
+                  switch: true
+                vacuum:
+                  speed: normal
+                  switch: true
+                robotMovement: medium
+                centreBrush:
+                  type: normal
+                  switch: true
+              order: 6
+            - cleaningRound: 5
+              name: name
+              cleaningDuration: 00:30:00
+              id: id
+              positions:
+              - 1.4658129805029452
+              - 1.4658129805029452
+              cleaningPreset:
+                side_brush:
+                  switch: true
+                vacuum:
+                  speed: normal
+                  switch: true
+                robotMovement: medium
+                centreBrush:
+                  type: normal
+                  switch: true
+              order: 6
+            noGoZones:
+            - id: id
+              positions:
+              - 5.637376656633329
+              - 5.637376656633329
+            - id: id
+              positions:
+              - 5.637376656633329
+              - 5.637376656633329
+            noCleanZones:
+            - id: id
+              positions:
+              - 2.3021358869347655
+              - 2.3021358869347655
+            - id: id
+              positions:
+              - 2.3021358869347655
+              - 2.3021358869347655
+            id: id
+        - default: false
+          name: name
+          id: id
+          map:
+            startingPoint:
+            - 0.8008281904610115
+            - 0.8008281904610115
+            path: path
+            mapData: mapData
+            name: name
+            cleanZones:
+            - cleaningRound: 5
+              name: name
+              cleaningDuration: 00:30:00
+              id: id
+              positions:
+              - 1.4658129805029452
+              - 1.4658129805029452
+              cleaningPreset:
+                side_brush:
+                  switch: true
+                vacuum:
+                  speed: normal
+                  switch: true
+                robotMovement: medium
+                centreBrush:
+                  type: normal
+                  switch: true
+              order: 6
+            - cleaningRound: 5
+              name: name
+              cleaningDuration: 00:30:00
+              id: id
+              positions:
+              - 1.4658129805029452
+              - 1.4658129805029452
+              cleaningPreset:
+                side_brush:
+                  switch: true
+                vacuum:
+                  speed: normal
+                  switch: true
+                robotMovement: medium
+                centreBrush:
+                  type: normal
+                  switch: true
+              order: 6
+            noGoZones:
+            - id: id
+              positions:
+              - 5.637376656633329
+              - 5.637376656633329
+            - id: id
+              positions:
+              - 5.637376656633329
+              - 5.637376656633329
+            noCleanZones:
+            - id: id
+              positions:
+              - 2.3021358869347655
+              - 2.3021358869347655
+            - id: id
+              positions:
+              - 2.3021358869347655
+              - 2.3021358869347655
+            id: id
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        cleaning_favorites:
+          items:
+            $ref: '#/components/schemas/cleaningFavorite'
+          minItems: 3
+          type: array
+      required:
+      - name
+      type: object
+    cleaningFavorite:
+      example:
+        default: false
+        name: name
+        id: id
+        map:
+          startingPoint:
+          - 0.8008281904610115
+          - 0.8008281904610115
+          path: path
+          mapData: mapData
+          name: name
+          cleanZones:
+          - cleaningRound: 5
+            name: name
+            cleaningDuration: 00:30:00
+            id: id
+            positions:
+            - 1.4658129805029452
+            - 1.4658129805029452
+            cleaningPreset:
+              side_brush:
+                switch: true
+              vacuum:
+                speed: normal
+                switch: true
+              robotMovement: medium
+              centreBrush:
+                type: normal
+                switch: true
+            order: 6
+          - cleaningRound: 5
+            name: name
+            cleaningDuration: 00:30:00
+            id: id
+            positions:
+            - 1.4658129805029452
+            - 1.4658129805029452
+            cleaningPreset:
+              side_brush:
+                switch: true
+              vacuum:
+                speed: normal
+                switch: true
+              robotMovement: medium
+              centreBrush:
+                type: normal
+                switch: true
+            order: 6
+          noGoZones:
+          - id: id
+            positions:
+            - 5.637376656633329
+            - 5.637376656633329
+          - id: id
+            positions:
+            - 5.637376656633329
+            - 5.637376656633329
+          noCleanZones:
+          - id: id
+            positions:
+            - 2.3021358869347655
+            - 2.3021358869347655
+          - id: id
+            positions:
+            - 2.3021358869347655
+            - 2.3021358869347655
+          id: id
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        default:
+          default: false
+          description: Default cleaning favorite
+          type: boolean
+        map:
+          $ref: '#/components/schemas/map'
+      type: object
+    map:
+      example:
+        startingPoint:
+        - 0.8008281904610115
+        - 0.8008281904610115
+        path: path
+        mapData: mapData
+        name: name
+        cleanZones:
+        - cleaningRound: 5
+          name: name
+          cleaningDuration: 00:30:00
+          id: id
+          positions:
+          - 1.4658129805029452
+          - 1.4658129805029452
+          cleaningPreset:
+            side_brush:
+              switch: true
+            vacuum:
+              speed: normal
+              switch: true
+            robotMovement: medium
+            centreBrush:
+              type: normal
+              switch: true
+          order: 6
+        - cleaningRound: 5
+          name: name
+          cleaningDuration: 00:30:00
+          id: id
+          positions:
+          - 1.4658129805029452
+          - 1.4658129805029452
+          cleaningPreset:
+            side_brush:
+              switch: true
+            vacuum:
+              speed: normal
+              switch: true
+            robotMovement: medium
+            centreBrush:
+              type: normal
+              switch: true
+          order: 6
+        noGoZones:
+        - id: id
+          positions:
+          - 5.637376656633329
+          - 5.637376656633329
+        - id: id
+          positions:
+          - 5.637376656633329
+          - 5.637376656633329
+        noCleanZones:
+        - id: id
+          positions:
+          - 2.3021358869347655
+          - 2.3021358869347655
+        - id: id
+          positions:
+          - 2.3021358869347655
+          - 2.3021358869347655
+        id: id
+      properties:
+        id:
+          type: string
+        name:
+          description: Image's filename
+          type: string
+        path:
+          description: "Path to Image's filename, excluding filename itself"
+          type: string
+        mapData:
+          description: |
+            Image file data in base64. Server includes this when fetching map object from map API. Client should not include this property when sending map data.
+          type: string
+        startingPoint:
+          default:
+          - 0
+          - 0
+          items:
+            format: double
+            type: number
+          maxItems: 2
+          minItems: 2
+          type: array
+        cleanZones:
+          items:
+            $ref: '#/components/schemas/cleanZone'
+          type: array
+        noGoZones:
+          items:
+            $ref: '#/components/schemas/noGoZone'
+          type: array
+        noCleanZones:
+          items:
+            $ref: '#/components/schemas/noCleanZone'
+          type: array
+      required:
+      - name
+      - startingPoint
+      type: object
+    cleanZone:
+      example:
+        cleaningRound: 5
+        name: name
+        cleaningDuration: 00:30:00
+        id: id
+        positions:
+        - 1.4658129805029452
+        - 1.4658129805029452
+        cleaningPreset:
+          side_brush:
+            switch: true
+          vacuum:
+            speed: normal
+            switch: true
+          robotMovement: medium
+          centreBrush:
+            type: normal
+            switch: true
+        order: 6
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        order:
+          description: "Higher than 0 is Cleaning Zone  \nLowest than 0 is Skipped\
+            \ Zone  \n0 is invalid\n"
+          not:
+            enum:
+            - 0
+            type: number
+          type: integer
+        positions:
+          default:
+          - 0
+          - 0
+          items:
+            format: double
+            type: number
+          maxItems: 2
+          minItems: 2
+          type: array
+        cleaningRound:
+          default: 1
+          maximum: 9
+          minimum: 1
+          type: integer
+        cleaningDuration:
+          default: 00:30:00
+          pattern: "([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]"
+          type: string
+        cleaningPreset:
+          $ref: '#/components/schemas/cleanZone_cleaningPreset'
+      required:
+      - cleaningDuration
+      - cleaningPreset
+      - cleaningRound
+      - name
+      - order
+      - position
+    noGoZone:
+      description: Area that robot cannot enter.
+      example:
+        id: id
+        positions:
+        - 5.637376656633329
+        - 5.637376656633329
+      properties:
+        id:
+          type: string
+        positions:
+          default:
+          - 0
+          - 0
+          items:
+            format: double
+            type: number
+          maxItems: 2
+          minItems: 2
+          type: array
+      required:
+      - id
+      - position
+    noCleanZone:
+      description: Area that robot can enter but cannot clean.
+      example:
+        id: id
+        positions:
+        - 2.3021358869347655
+        - 2.3021358869347655
+      properties:
+        id:
+          type: string
+        positions:
+          default:
+          - 0
+          - 0
+          items:
+            format: double
+            type: number
+          maxItems: 2
+          minItems: 2
+          type: array
+      required:
+      - id
+      - position
+    point:
+      default:
+      - 0
+      - 0
+      items:
+        format: double
+        type: number
+      maxItems: 2
+      minItems: 2
+      type: array
+    ApiResponse:
+      properties:
+        code:
+          format: int32
+          type: integer
+        type:
+          type: string
+        message:
+          type: string
+      type: object
+    updatePlan_request:
+      properties:
+        file:
+          description: Map image file (Optional)
+          format: binary
+          type: string
+        json:
+          $ref: '#/components/schemas/cleaningPlan'
+      required:
+      - json
+      type: object
+    addPlan_request:
+      properties:
+        file:
+          description: Map image file
+          format: binary
+          type: string
+        json:
+          $ref: '#/components/schemas/cleaningPlan'
+      required:
+      - file
+      - json
+      type: object
+    cleanZone_cleaningPreset_vacuum:
+      example:
+        speed: normal
+        switch: true
+      properties:
+        switch:
+          default: true
+          type: boolean
+        speed:
+          default: normal
+          enum:
+          - eco
+          - normal
+          - hi-power
+          type: string
+      required:
+      - speed
+      - switch
+      type: object
+    cleanZone_cleaningPreset_centreBrush:
+      example:
+        type: normal
+        switch: true
+      properties:
+        switch:
+          default: true
+          type: boolean
+        type:
+          default: normal
+          enum:
+          - normal
+          - deep_cleaning
+          type: string
+      required:
+      - switch
+      - type
+      type: object
+    cleanZone_cleaningPreset_side_brush:
+      example:
+        switch: true
+      properties:
+        switch:
+          default: true
+          type: boolean
+      required:
+      - switch
+      type: object
+    cleanZone_cleaningPreset:
+      example:
+        side_brush:
+          switch: true
+        vacuum:
+          speed: normal
+          switch: true
+        robotMovement: medium
+        centreBrush:
+          type: normal
+          switch: true
+      properties:
+        robotMovement:
+          default: medium
+          enum:
+          - slow
+          - medium
+          - fast
+          type: string
+        vacuum:
+          $ref: '#/components/schemas/cleanZone_cleaningPreset_vacuum'
+        centreBrush:
+          $ref: '#/components/schemas/cleanZone_cleaningPreset_centreBrush'
+        side_brush:
+          $ref: '#/components/schemas/cleanZone_cleaningPreset_side_brush'
+      required:
+      - robot_movement
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http

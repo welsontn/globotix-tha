@@ -1,0 +1,511 @@
+openapi: 3.0.3
+info: 
+  title: Globotix Robot - Cleaning Plan
+  version: "0.1"
+  description: BE - Take Home Assignment
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: Welson
+
+servers:
+  - url: http://localhost:8888/api/v1
+
+tags:
+  - name: plan
+    description: Cleaning Plan
+
+paths:
+  /plans:
+    get:
+      tags:
+        - plan
+      summary: Get a list of cleaning plans
+      description: Get a list of cleaning plans
+      operationId: getPlans
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/cleaningPlan'
+        '400':
+          description: Error
+    post:
+      tags:
+        - plan
+      summary: Add a new cleaning plan
+      description: Add a new cleaning plan with map image uploaded too.
+      operationId: addPlan      
+      requestBody:
+        description: Cleaning plan with all of its particulars to be added to database
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+                - json
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Map image file
+                json:
+                  $ref: '#/components/schemas/cleaningPlan'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+    put:
+      tags:
+        - plan
+      summary: Update existing cleaning plan
+      description: Update existing cleaning plan. Optionally a map image.
+      operationId: updatePlan
+      requestBody:
+        description: Cleaning plan with all of its particulars to be updated
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - json
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Map image file (Optional)
+                json:
+                  $ref: '#/components/schemas/cleaningPlan'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          
+  /plans/{planId}:
+    delete:
+      tags:
+        - plan
+      summary: Delete cleaning plan along with its map image file by ID
+      description: Delete cleaning plan along with its map image file by ID
+      operationId: deletePlanById
+      parameters:
+        - name: planId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: ID Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          
+  /plans/{planId}/map:
+    get:
+      tags:
+        - plan
+      summary: Get a list of map object with image file along with its data
+      description: Get a list of map object with image file along with its data such as startingPoint, noGoZones, etc
+      operationId: getMapByPlanId
+      parameters:
+        - name: planId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful operation with a list of maps
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/map'
+        '400':
+          description: Should only error if no plan ID is found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          
+  /plans/{planId}/clean_zones:
+    put:
+      tags:
+        - plan
+      summary: Update cleaning zone object with json
+      description: >
+        Update cleaning zone object with json
+      operationId: updateZoneByZoneId
+      parameters:
+        - name: planId
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Update cleaning zone object
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/cleanZone'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          
+  /plans/{planId}/no_go_zones:
+    put:
+      tags:
+        - plan
+      summary: Update No Go zone object with json
+      description: >
+        Update No Go zone object with json
+      operationId: updateNoGoZoneByZoneId
+      parameters:
+        - name: planId
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Update No Go zone object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/noGoZone'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          
+  /plans/{planId}/no_clean_zones:
+    put:
+      tags:
+        - plan
+      summary: Update No Clean zone object with json
+      description: >
+        Update No Clean zone object with json
+      operationId: updateNoCleanZoneByZoneId
+      parameters:
+        - name: planId
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Update No Clean zone object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/noCleanZone'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          
+  /plans/{planId}/favorites:
+    get:
+      tags:
+        - plan
+      summary: Get cleaning Favorite Plan object
+      description: Get cleaning Favorite Plan object along with its data such as startingPoint, noGoZones, etc
+      operationId: getFavoritesByPlanId
+      parameters:
+        - name: planId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful operation with a list of cleaning favorite
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/cleaningFavorite'
+        '400':
+          description: Should only error if plan ID is not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          
+  /plans/{planId}/command:
+    post:
+      tags:
+        - plan
+      summary: Create a cleaning plan command object and send to robot
+      description: >
+        Create a cleaning plan command object and send to Robot based on Cleaning Plan object    
+          Also generate command log and stored on server side
+        
+        Following informations are stored in logs:  
+          Location Name, order of zone to be cleaned, cleaning parameters for each zones, skipped zones and starting time the cleaning plan run
+        
+      operationId: addPlanCommand
+      parameters:
+        - name: planId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          
+components:
+  schemas:
+    cleaningPlan:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        cleaning_favorites:
+          type: array
+          minItems: 3
+          items:
+            $ref: '#/components/schemas/cleaningFavorite'
+          
+    cleaningFavorite:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        default:
+          type: boolean
+          description: >-
+            Default cleaning favorite
+          default: false
+        map:
+          $ref: '#/components/schemas/map'
+          
+    map:
+      type: object
+      required:
+        - name
+        - startingPoint
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          description: "Image's filename"
+        path:
+          type: string
+          description: "Path to Image's filename, excluding filename itself"
+        mapData:
+          type: string
+          description: >
+            Image file data in base64.
+            Server includes this when fetching map object from map API.
+            Client should not include this property when sending map data.
+        startingPoint:
+          $ref: "#/components/schemas/point"
+        cleanZones:
+          type: array
+          items:
+            $ref: '#/components/schemas/cleanZone'
+        noGoZones:
+          type: array
+          items:
+            $ref: '#/components/schemas/noGoZone'
+        noCleanZones:
+          type: array
+          items:
+            $ref: '#/components/schemas/noCleanZone'
+    
+    cleanZone:
+      required:
+        - name
+        - order
+        - position
+        - cleaningRound
+        - cleaningDuration
+        - cleaningPreset
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        order:
+          type: integer
+          not:
+            enum:
+              - 0
+          description: |
+            Higher than 0 is Cleaning Zone  
+            Lowest than 0 is Skipped Zone  
+            0 is invalid
+        positions:
+          $ref: '#/components/schemas/point'
+        cleaningRound:
+          type: integer
+          minimum: 1
+          maximum: 9
+          default: 1
+        cleaningDuration:
+          type: string
+          pattern: ([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]
+          default: '00:30:00'
+        cleaningPreset:
+          required:
+            - robot_movement
+          type: object
+          properties:
+            robotMovement:
+              type: string
+              enum:
+                - slow
+                - medium
+                - fast
+              default: medium
+            vacuum:
+              type: object
+              required:
+                - switch
+                - speed
+              properties:
+                switch:
+                  type: boolean
+                  default: true
+                speed:
+                  type: string
+                  enum:
+                    - eco
+                    - normal
+                    - hi-power
+                  default: normal
+            centreBrush:
+              type: object
+              required:
+                - switch
+                - type
+              properties:
+                switch:
+                  type: boolean
+                  default: true
+                type:
+                  type: string
+                  enum:
+                    - normal
+                    - deep_cleaning
+                  default: normal
+            side_brush:
+              type: object
+              required:
+                - switch
+              properties:
+                switch:
+                  type: boolean
+                  default: true
+          
+    noGoZone:
+      required:
+        - id
+        - position
+      description: >-
+        Area that robot cannot enter.
+      properties:
+        id:
+          type: string
+        positions:
+          $ref: '#/components/schemas/point'
+          
+    noCleanZone:
+      required:
+        - id
+        - position
+      description: >-
+        Area that robot can enter but cannot clean.
+      properties:
+        id:
+          type: string
+        positions:
+          $ref: '#/components/schemas/point'
+                      
+    # common schema
+    point:
+      type: array
+      items:
+        type: number
+        format: double
+      minItems: 2
+      maxItems: 2
+      default:
+        - 0
+        - 0
+        
+    # response
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+security:
+  - bearerAuth: []
