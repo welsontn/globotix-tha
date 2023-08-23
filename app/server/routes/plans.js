@@ -3,12 +3,18 @@ const express = require('express');
 const routes = express.Router();
 
 const multer  = require('multer')
+const fs = require('fs');
+const config = require('../config');
 
 const planController = require('../controllers/PlanController');
 
 // multer storage configuration
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
+      const path = config.IMAGE_UPLOAD_PATH; // use config instead of hardcoded
+      if (!fs.existsSync(path)){
+        fs.mkdirSync(path, { recursive: true })
+      }
       cb(null, 'home/images/maps')
     },
     filename: function (req, file, cb) {

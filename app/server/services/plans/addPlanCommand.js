@@ -1,5 +1,6 @@
 const CleaningPlan = require('../../models/CleaningPlan');
 const fs = require('fs').promises;
+const config = require('../../config')
 
 const addPlanCommand = async (req, res) => {
   const planId = req.params.planId;
@@ -18,12 +19,8 @@ const addPlanCommand = async (req, res) => {
   
   
   // create dir
-  const dirpath = 'home/images/logs';  // Hardcoded path (consideration: use config to set path better)
-  try {
-    await fs.mkdir(dirpath, { recursive: true })
-  } catch (e){
-    // do nothing (this is very quick and dirty way to check and create dir)
-  }
+  const dirpath = config.LOG_UPLOAD_PATH;
+  await fs.mkdir(dirpath, { recursive: true })
 
   // create file log based on date
   const fullpath = dirpath + '/' + Date.now() + '.txt';
