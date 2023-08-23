@@ -26,9 +26,7 @@ With default `.env`, OpenAPI doc can be accessed via `http://localhost:8888/api-
 
 ## Accessing MongoDB
 
-Database admin can be accessed from `http://localhost:8081`. Credential is based on `.env`.
-
-Alternatively, use your favourite database client and access via `mongodb://<MONGO_USER>:<MONGO_PASS>@localhost:27017`
+MongoDB can be accessed via `mongodb://<MONGO_USER>:<MONGO_PASS>@localhost:27017` using your favourite database client.
 
 # Generating Stubs with OpenAPI Generator
 
